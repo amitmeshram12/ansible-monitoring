@@ -1,0 +1,91 @@
+- name: Deploy Prometheus and Grafana Monitoring Solution
+  hosts: all
+  become: yes
+  tasks:
+  # Install Prometheus
+  - name: Install Prometheus
+    apt:
+      name: prometheus
+      state: present
+
+  # Install Grafana
+  - name: Install Grafana
+    apt:
+      name: grafana
+      state: present
+
+  # Start and enable Prometheus service
+  - name: Start and enable Prometheus service
+    service:
+      name: prometheus
+      state: started
+      enabled: yes
+
+  # Start and enable Grafana service
+  - name: Start and enable Grafana service
+    service:
+      name: grafana-server
+      state: started
+      enabled: yes
+
+  # Configure Prometheus
+  - name: Configure Prometheus
+    copy:
+      content: |
+        global:
+          scrape_interval: 5s
+
+        scrape_configs:
+          - job_name: 'node_exporter'
+            static_configs:
+              - targets: ['localhost:9100']
+      dest: /etc/prometheus/prometheus.yml
+
+  # Configure Prometheus alerting rules
+  - name: Configure Prometheus alerting rules
+    copy:
+      content: |
+        groups:
+          - name: example
+            rules:
+              - alert: HighCpuUsage
+                expr: node_cpu_seconds_total{mode="idle"} < 500
+                for: 1m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "High CPU Usage"
+                  description: "CPU usage is high for the last 1 minute."
+      dest: /etc/prometheus/alert.rules
+
+  # Restart Prometheus service to apply configuration changes
+  - name: Restart Prometheus service
+    service:
+      name: prometheus
+      state: restarted
+
+  # Configure Grafana data source
+  - name: Configure Grafana data source
+    copy:
+      content: |
+        apiVersion: 1
+
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://localhost:9090
+            isDefault: true
+      dest: /etc/grafana/provisioning/datasources/datasource.yml
+
+  # Configure Grafana dashboard
+  - name: Configure Grafana dashboard
+    copy:
+      src: ./dashboard.json
+      dest: /etc/grafana/provisioning/dashboards/dashboard.json
+
+  # Restart Grafana service to apply configuration changes
+  - name: Restart Grafana service
+    service:
+      name: grafana-server
+      state: restarted
