@@ -46,7 +46,7 @@
     copy:
       content: |
         groups:
-          - name: example
+          - name: alerts 
             rules:
               - alert: HighCpuUsage
                 expr: node_cpu_seconds_total{mode="idle"} < 500
