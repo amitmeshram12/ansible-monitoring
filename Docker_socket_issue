@@ -1,0 +1,54 @@
+====Docker permission command
+
+sudo usermod -aG docker $USER
+groups
+docker run hello-world
+sudo service docker restart
+ls -l /var/run/docker.sock
+sudo chown root:docker /var/run/docker.sock
+sudo chown -R ubuntu:docker /var/run/docker.sock
+
+sudo vim /etc/docker/daemon.json
+
+==Add the following content to the file:
+
+
+{
+  "group": "docker"
+}
+
+# Download the latest version of Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+# Apply executable permissions to the binary
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+=========Docker-compose=====after=install=================================================================
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: 
+Get "http://%2Fvar%2Frun%2Fdocker.sock/_ping": dial unix /var/run/docker.sock: connect: permission denied
+run this command
+
+sudo chmod 666 /var/run/docker.sock
+sudo service docker restart
+
+==========================================================================================================
+++++++++++++++++++++++++++++++++ change jenkins permisson know host +++++++++++++++++++++++++++++++++++++
+sudo chown -R jenkins:jenkins /var/lib/jenkins/.ssh/known_hosts
+sudo chmod 700 /var/lib/jenkins/.ssh
+sudo chmod 644 /var/lib/jenkins/.ssh/known_hosts
+sudo chown -R jenkins:jenkins /var/lib/jenkins/.ssh
+sudo vim /etc/default/jenkins
+===========================================================================================================
+That is work authorized our key
+cat id_rsa.pub >> authorized_keys 
+
+
+
+
+
+
+
+
+
+
